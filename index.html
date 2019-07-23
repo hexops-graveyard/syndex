@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Go wasm</title>
+		<script src="wasm_exec.js"></script>
+	</head>
+	<body>
+		<script>
+			if (!WebAssembly.instantiateStreaming) {
+				alert("Browser does not support WebAssembly.instantiateStreaming")
+			}
+
+			const go = new Go();
+			let mod, inst;
+			WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+				mod = result.module;
+				inst = result.instance;
+				go.run(inst);
+			}).catch((err) => {
+				console.error(err);
+			});
+		</script>
+	</body>
+</html>
