@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<script src="wasm_exec.js"></script
+<script src="wasm_exec.js?v1"></script
 ><script>
   (async () => {
-    const resp = await fetch("main.wasm");
+    const resp = await fetch("main.wasm?v1");
     if (!resp.ok) {
       const pre = document.createElement("pre");
       pre.innerText = await resp.text();
