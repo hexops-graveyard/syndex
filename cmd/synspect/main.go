@@ -1,27 +1,28 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"net/http"
+	"strings"
+
 	"github.com/gopherjs/vecty"
 	"github.com/gopherjs/vecty/elem"
 	"github.com/gopherjs/vecty/event"
-	"net/http"
-	"encoding/json"
-	"bytes"
-	"strings"
 )
 
 func main() {
 	vecty.SetTitle("Synspect")
 	vecty.RenderBody(&PageView{
 		serverURL: defaultServerURL,
-		filename: defaultFilename,
-		code: defaultCode,
+		filename:  defaultFilename,
+		code:      defaultCode,
 	})
 }
 
 type Tooltip struct {
 	vecty.Core
-	Text string `vecty:"prop"`
+	Text  string                       `vecty:"prop"`
 	Child func() vecty.ComponentOrHTML `vecty:"prop"`
 
 	visible bool
@@ -66,13 +67,13 @@ func (t *Tooltip) Render() vecty.ComponentOrHTML {
 type PageView struct {
 	vecty.Core
 	serverURL, filename string
-	code string
-	html string
-	error string
+	code                string
+	html                string
+	error               string
 
 	pinging, connected bool
 
-	regions []scopifiedRegion
+	regions    []scopifiedRegion
 	scopeNames []string
 }
 
@@ -84,25 +85,25 @@ func (p *PageView) ping() {
 func (p *PageView) updateHTML() {
 	j, err := json.Marshal(map[string]interface{}{
 		"filepath": p.filename,
-		"theme": "InspiredGitHub",
-		"code": p.code,
+		"theme":    "InspiredGitHub",
+		"code":     p.code,
 	})
 	if err != nil {
 		p.error = err.Error()
 		return
 	}
-	resp, err := http.Post(p.serverURL + "/", "application/json", bytes.NewReader(j))
+	resp, err := http.Post(p.serverURL+"/", "application/json", bytes.NewReader(j))
 	if err != nil {
 		p.error = err.Error()
 		return
 	}
 	defer resp.Body.Close()
-	respData := &struct{
-		Data string
+	respData := &struct {
+		Data             string
 		DetectedLanguage string
-		Plaintext bool
-		Error string
-		Code string
+		Plaintext        bool
+		Error            string
+		Code             string
 	}{}
 	if err := json.NewDecoder(resp.Body).Decode(&respData); err != nil {
 		p.error = err.Error()
@@ -124,28 +125,28 @@ func (p *PageView) Mount() {
 func (p *PageView) updateScopified() {
 	p.error = ""
 	j, err := json.Marshal(map[string]interface{}{
-		"theme": "",
+		"theme":    "",
 		"filepath": p.filename,
-		"scopify": true,
-		"code": p.code,
+		"scopify":  true,
+		"code":     p.code,
 	})
 	if err != nil {
 		p.error = err.Error()
 		return
 	}
-	resp, err := http.Post(p.serverURL + "/", "application/json", bytes.NewReader(j))
+	resp, err := http.Post(p.serverURL+"/", "application/json", bytes.NewReader(j))
 	if err != nil {
 		p.error = err.Error()
 		return
 	}
 	defer resp.Body.Close()
-	respData := &struct{
-		DetectedLanguage string `json:"detected_languaged"`
-		Plaintext bool
-		ScopifiedRegions []scopifiedRegion `json:"scopified_regions"`
-		ScopifiedScopeNames []string `json:"scopified_scope_names"`
-		Error string
-		Code string
+	respData := &struct {
+		DetectedLanguage    string `json:"detected_languaged"`
+		Plaintext           bool
+		ScopifiedRegions    []scopifiedRegion `json:"scopified_regions"`
+		ScopifiedScopeNames []string          `json:"scopified_scope_names"`
+		Error               string
+		Code                string
 	}{}
 	if err := json.NewDecoder(resp.Body).Decode(respData); err != nil {
 		p.error = err.Error()
@@ -177,7 +178,7 @@ func createEmptyRegions(regions []scopifiedRegion) []scopifiedRegion {
 
 type scopifiedRegion struct {
 	Length, Offset int
-	Scopes []int
+	Scopes         []int
 }
 
 func (p *PageView) renderScopified() vecty.ComponentOrHTML {
@@ -191,7 +192,7 @@ func (p *PageView) renderScopified() vecty.ComponentOrHTML {
 		l = append(l, &Tooltip{
 			Text: strings.Join(names, " "),
 			Child: func() vecty.ComponentOrHTML {
-				return vecty.Text(p.code[r.Offset:r.Offset+r.Length])
+				return vecty.Text(p.code[r.Offset : r.Offset+r.Length])
 			},
 		})
 	}
