@@ -261,7 +261,7 @@ func (p *PageView) Render() vecty.ComponentOrHTML {
 	)
 }
 
-const defaultServerURL = "http://localhost:8000"
+const defaultServerURL = "http://178.128.74.57:9238"
 
 const defaultFilename = "mux.go"
 
